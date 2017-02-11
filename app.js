@@ -4,11 +4,16 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose'); // <-- Install and require
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
+// database setup
+// set up for production OR development
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/voting');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
