@@ -1,9 +1,47 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
+// Import our User model
+var User = require('../models/user');
+
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
+});
+
+// Create new account
+router.post('/signup', function(req, res, next) {
+  // get values from request body (comes from signup form)
+  var email = req.body.email;
+  var password = req.body.password;
+
+  // cannot proceed if no values
+  if (!email || !password) {
+    return res.status(422).send({ error: 'You must provide email and password'});
+  }
+
+  // check for existing user email in database
+  User.findOne({ email: email }, function(err, existingUser) {
+    // always handle possible errors
+    if (err) { return next(err); }
+    // if a record is found, display error
+    if (existingUser) {
+      return res.status(422).send({ error: 'Email is in use' });
+    }
+
+    // if no record found, define new user instance
+    var user = new User({
+      email: email,
+      password: password
+    });
+
+    // save to database
+    user.save(function(err) {
+      // handle error
+      if (err) { return next(err); }
+      // respond with user object
+      res.json({ success: true, user: user });
+    });
+  });
 });
 
 module.exports = router;
